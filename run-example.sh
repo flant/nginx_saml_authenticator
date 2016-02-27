@@ -8,5 +8,6 @@ export AUTHENTICATION_REQUIRED=no
 export ATTRIBUTES=email:mail:s:login::s:groups::m
 export CERTIFICATE=/etc/nginx/saml/sp.crt
 export PRIVATE_KEY=/etc/nginx/saml/sp.key
+export SLO_DISABLED=yes
 
 thin -e production -R config.ru -a 127.0.0.1 -p 1500 start

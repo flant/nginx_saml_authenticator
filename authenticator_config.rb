@@ -46,7 +46,7 @@ class AuthenticatorConfig
   end
 
   def slo_disabled?
-    @authentication_required
+    @slo_disabled
   end
 
   def deep_freeze
@@ -163,7 +163,6 @@ class AuthenticatorConfig
     @saml_settings.idp_sso_target_parse_binding_priority =
       @saml_settings.idp_slo_target_parse_binding_priority =
         ['urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST', 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect']
-        #['urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect']
 
     if idp_metadata_url = env_param('IDP_METADATA_URL', :required => false)
       idp_metadata_parser = OneLogin::RubySaml::IdpMetadataParser.new
