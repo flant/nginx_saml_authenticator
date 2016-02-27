@@ -1,0 +1,121 @@
+auth_request /saml/auth;
+auth_request_set $saml_location $upstream_http_location;
+auth_request_set $saml_authorization $upstream_http_authorization;
+auth_request_set $saml_set_cookie $upstream_http_set_cookie;
+
+error_page 403 = @saml_auth;
+
+proxy_set_header Authorization $saml_authorization;
+
+add_header Cache-Control 'no-cache, no-store';
+add_header Pragma no-cache;
+add_header Set-Cookie $saml_set_cookie;
+
+location @saml_auth {
+  internal;
+  
+  if ($saml_location) {
+    return 302 $saml_location;
+  }
+}
+
+location = /saml/auth {
+  internal;
+  auth_request off;
+
+  proxy_pass http://$saml_authenticator;
+  proxy_pass_request_body off;
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  proxy_set_header X-Auth-Request-Original-Uri "$request_uri";
+}
+
+location ^~ /saml/ {
+  auth_request off;
+  add_header X-Frame-Options DENY;
+
+  proxy_pass http://$saml_authenticator;
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+  proxy_intercept_errors on;
+  error_page 400 = @saml_error_400;
+  error_page 401 = @saml_error_401;
+  error_page 402 = @saml_error_402;
+  error_page 403 = @saml_error_403;
+  error_page 404 = @saml_error_404;
+  error_page 405 = @saml_error_405;
+  error_page 406 = @saml_error_406;
+  error_page 407 = @saml_error_407;
+  error_page 408 = @saml_error_408;
+  error_page 409 = @saml_error_409;
+  error_page 410 = @saml_error_410;
+  error_page 411 = @saml_error_411;
+  error_page 412 = @saml_error_412;
+  error_page 413 = @saml_error_413;
+  error_page 414 = @saml_error_414;
+  error_page 415 = @saml_error_415;
+  error_page 416 = @saml_error_416;
+  error_page 417 = @saml_error_417;
+  error_page 418 = @saml_error_418;
+  error_page 419 = @saml_error_419;
+  error_page 421 = @saml_error_421;
+  error_page 422 = @saml_error_422;
+  error_page 423 = @saml_error_423;
+  error_page 424 = @saml_error_424;
+  error_page 426 = @saml_error_426;
+  error_page 428 = @saml_error_428;
+  error_page 429 = @saml_error_429;
+  error_page 431 = @saml_error_431;
+  error_page 451 = @saml_error_451;
+  error_page 500 = @saml_error_500;
+  error_page 501 = @saml_error_501;
+  error_page 502 = @saml_error_502;
+  error_page 503 = @saml_error_503;
+  error_page 504 = @saml_error_504;
+  error_page 505 = @saml_error_505;
+  error_page 506 = @saml_error_506;
+  error_page 507 = @saml_error_507;
+  error_page 508 = @saml_error_508;
+  error_page 510 = @saml_error_510;
+  error_page 511 = @saml_error_511;
+}
+
+location @saml_error_400 { internal; auth_request off; return 400; }
+location @saml_error_401 { internal; auth_request off; return 401; }
+location @saml_error_402 { internal; auth_request off; return 402; }
+location @saml_error_403 { internal; auth_request off; return 403; }
+location @saml_error_404 { internal; auth_request off; return 404; }
+location @saml_error_405 { internal; auth_request off; return 405; }
+location @saml_error_406 { internal; auth_request off; return 406; }
+location @saml_error_407 { internal; auth_request off; return 407; }
+location @saml_error_408 { internal; auth_request off; return 408; }
+location @saml_error_409 { internal; auth_request off; return 409; }
+location @saml_error_410 { internal; auth_request off; return 410; }
+location @saml_error_411 { internal; auth_request off; return 411; }
+location @saml_error_412 { internal; auth_request off; return 412; }
+location @saml_error_413 { internal; auth_request off; return 413; }
+location @saml_error_414 { internal; auth_request off; return 414; }
+location @saml_error_415 { internal; auth_request off; return 415; }
+location @saml_error_416 { internal; auth_request off; return 416; }
+location @saml_error_417 { internal; auth_request off; return 417; }
+location @saml_error_418 { internal; auth_request off; return 418; }
+location @saml_error_419 { internal; auth_request off; return 419; }
+location @saml_error_421 { internal; auth_request off; return 421; }
+location @saml_error_422 { internal; auth_request off; return 422; }
+location @saml_error_423 { internal; auth_request off; return 423; }
+location @saml_error_424 { internal; auth_request off; return 424; }
+location @saml_error_426 { internal; auth_request off; return 426; }
+location @saml_error_428 { internal; auth_request off; return 428; }
+location @saml_error_429 { internal; auth_request off; return 429; }
+location @saml_error_431 { internal; auth_request off; return 431; }
+location @saml_error_451 { internal; auth_request off; return 451; }
+location @saml_error_500 { internal; auth_request off; return 500; }
+location @saml_error_501 { internal; auth_request off; return 501; }
+location @saml_error_502 { internal; auth_request off; return 502; }
+location @saml_error_503 { internal; auth_request off; return 503; }
+location @saml_error_504 { internal; auth_request off; return 504; }
+location @saml_error_505 { internal; auth_request off; return 505; }
+location @saml_error_506 { internal; auth_request off; return 506; }
+location @saml_error_507 { internal; auth_request off; return 507; }
+location @saml_error_508 { internal; auth_request off; return 508; }
+location @saml_error_510 { internal; auth_request off; return 510; }
+location @saml_error_511 { internal; auth_request off; return 511; }

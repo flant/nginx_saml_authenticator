@@ -1,0 +1,57 @@
+GIT
+  remote: https://github.com/flant/ruby-saml.git
+  revision: 8bf87876d3252e08b0cf6ae7fe9f6e1fef283b45
+  specs:
+    ruby-saml (1.1.1)
+      nokogiri (>= 1.5.10)
+      uuid (~> 2.3)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    backports (3.6.7)
+    daemons (1.2.3)
+    dalli (2.7.5)
+    eventmachine (1.0.8)
+    ice_nine (0.11.1)
+    macaddr (1.7.1)
+      systemu (~> 2.6.2)
+    mini_portile2 (2.0.0)
+    multi_json (1.11.2)
+    nokogiri (1.6.7.1)
+      mini_portile2 (~> 2.0.0.rc2)
+    rack (1.5.2)
+    rack-protection (1.5.1)
+      rack
+    rack-test (0.6.3)
+      rack (>= 1.0)
+    sinatra (1.4.3)
+      rack (~> 1.4)
+      rack-protection (~> 1.4)
+      tilt (~> 1.3, >= 1.3.4)
+    sinatra-contrib (1.4.6)
+      backports (>= 2.0)
+      multi_json
+      rack-protection
+      rack-test
+      sinatra (~> 1.4.0)
+      tilt (>= 1.3, < 3)
+    systemu (2.6.5)
+    thin (1.6.4)
+      daemons (~> 1.0, >= 1.0.9)
+      eventmachine (~> 1.0, >= 1.0.4)
+      rack (~> 1.0)
+    tilt (1.4.1)
+    uuid (2.3.8)
+      macaddr (~> 1.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  dalli
+  ice_nine
+  ruby-saml!
+  sinatra
+  sinatra-contrib
+  thin

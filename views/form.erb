@@ -1,0 +1,15 @@
+<head>
+  <title>SAML 2.0 POST</title>"
+</head>
+<body>
+  <form method="post" action="<%= action %>">
+    <input type="hidden" name="SAMLRequest" value="<%= params['SAMLRequest'] %>" />
+<% if !params['RelayState'].nil? and !params['RelayState'].empty? %>
+    <input type="hidden" name="RelayState" value="<%= params['RelayState'] %>" />
+<% end %>
+    <input type="submit" value="Submit" />
+  </form>
+  <script type="text/javascript">
+    window.onload = function (){ document.forms[0].submit(); }
+  </script>
+</body>
