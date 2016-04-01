@@ -1,0 +1,29 @@
+build_type: fpm
+package_name: nginx_saml_authenticator
+package_cloud: flant/main
+package_version: 0.0.1
+
+fpm_config_files:
+  /etc/nginx/saml_authenticator.include: nginx.include
+
+fpm_files:
+  /opt/nginx_saml_authenticator/authenticator_config.rb: authenticator_config.rb
+  /opt/nginx_saml_authenticator/authenticator.rb: authenticator.rb
+  /opt/nginx_saml_authenticator/config.ru: config.ru
+  /opt/nginx_saml_authenticator/nginx-example.conf: nginx-example.conf
+  /opt/nginx_saml_authenticator/run-example.sh: run-example.sh
+  /opt/nginx_saml_authenticator/views: views
+  /opt/nginx_saml_authenticator/vendor: vendor
+  /usr/bin/nginx_saml_authenticator: nginx_saml_authenticator
+
+os:
+  ubuntu:
+    prepare:
+    - apt-get install git ruby-bundler libxml2-dev zlib1g-dev
+
+before_build:
+- bundle install --standalone --deployment
+
+target:
+- ubuntu-14.04
+- ubuntu-12.04
