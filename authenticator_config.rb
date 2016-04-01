@@ -1,14 +1,14 @@
 class AuthenticatorConfig
-  def env_param(name, kwargs={})
+  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+  def env_param(name, kwargs = {})
     default = kwargs.key?(:default) ? kwargs[:default] : nil
     required = kwargs.key?(:required) ? kwargs[:required] : true
-    extra_message = kwargs.key?(:extra_message) ? kwargs[:extra_message] : ''
 
     if ENV.key? name
       if block_given?
         begin
           yield ENV[name]
-        rescue Exception => e
+        rescue StandardError => e
           puts "Error! Failed to process parameter #{name}: #{e.message}"
           exit 1
         end
@@ -22,12 +22,15 @@ class AuthenticatorConfig
       default
     end
   end
+  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
+  # rubocop:disable Metrics/CyclomaticComplexity
   def param_to_bool(v)
-    return true if v == true || v =~ (/^(true|t|yes|y|1)$/i)
-    return false if v == false || v.nil? || v.empty? || v =~ (/^(false|f|no|n|0)$/i)
-    raise ArgumentError.new("invalid value for Boolean: \"#{v}\"")
+    return true if v == true || v =~ /^(true|t|yes|y|1)$/i
+    return false if v == false || v.nil? || v.empty? || v =~ /^(false|f|no|n|0)$/i
+    raise ArgumentError, "invalid value for Boolean: \"#{v}\""
   end
+  # rubocop:enable Metrics/CyclomaticComplexity
 
   def initialize
     setup_public_url
@@ -41,13 +44,17 @@ class AuthenticatorConfig
   attr_reader :saml_settings
   attr_reader :saml_attributes
 
+  # rubocop:disable Style/TrivialAccessors
   def authentication_required?
     @authentication_required
   end
+  # rubocop:enable Style/TrivialAccessors
 
+  # rubocop:disable Style/TrivialAccessors
   def slo_disabled?
     @slo_disabled
   end
+  # rubocop:enable Style/TrivialAccessors
 
   def deep_freeze
     IceNine.deep_freeze self
@@ -57,10 +64,10 @@ class AuthenticatorConfig
     if @sessions_settings.include? :memcache_server
       sessions_settings = @sessions_settings.dup
 
-      sessions_settings.merge(:cache => Dalli::Client.new(
+      sessions_settings.merge(cache: Dalli::Client.new(
         sessions_settings.delete(:memcache_server),
-        :expires_in => sessions_settings.delete(:expires_in),
-        :namespace => sessions_settings.delete(:namespace)
+        expires_in: sessions_settings.delete(:expires_in),
+        namespace: sessions_settings.delete(:namespace)
       ))
     else
       @sessions_settings
@@ -70,28 +77,28 @@ class AuthenticatorConfig
   private
 
   def setup_public_url
-    @public_url = env_param('PUBLIC_URL').gsub(/\/*$/, '') + '/'
+    @public_url = env_param('PUBLIC_URL').gsub(%r{\/*$}, '') + '/'
   end
 
   def setup_authentication
-    @authentication_required = env_param 'AUTHENTICATION_REQUIRED', :required => false, :default => true do |param|
-      self.param_to_bool(param)
+    @authentication_required = env_param 'AUTHENTICATION_REQUIRED', required: false, default: true do |param|
+      param_to_bool(param)
     end
   end
 
   def setup_sessions
     @sessions_settings = {}
-    @sessions_settings[:key] = env_param 'SESSION_COOKIE_NAME', :default => 'saml', :required => false
+    @sessions_settings[:key] = env_param 'SESSION_COOKIE_NAME', default: 'saml', required: false
     @sessions_settings[:secure] = public_url.start_with? 'https://'
-    @sessions_settings[:expire_after] = env_param 'SESSION_EXPIRE_AFTER', :default => 600, :required => false do |v|
+    @sessions_settings[:expire_after] = env_param 'SESSION_EXPIRE_AFTER', default: 600, required: false do |v|
       Integer(v)
     end
 
-    if memcache_servers = env_param('SESSION_MEMCACHE_SERVERS', :required => false)
+    if (memcache_servers = env_param('SESSION_MEMCACHE_SERVERS', required: false))
       require 'rack/session/dalli'
 
       @sessions_settings[:memcache_server] = memcache_servers
-      @sessions_settings[:namespace] = env_param 'SESSION_MEMCACHE_NAMESPACE', :default => 'sessions', :required => false
+      @sessions_settings[:namespace] = env_param 'SESSION_MEMCACHE_NAMESPACE', default: 'sessions', required: false
 
       @sessions_backend = Rack::Session::Dalli
     else
@@ -114,10 +121,10 @@ class AuthenticatorConfig
   def setup_saml_logger
     OneLogin::RubySaml::Logging.logger.level = Logger::WARN
   end
- 
+
   def setup_saml_sp
     @saml_settings.issuer = public_url + 'saml/metadata'
-  
+
     @saml_settings.assertion_consumer_service_url = public_url + 'saml/acs'
     @saml_settings.assertion_consumer_service_binding = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
 
@@ -125,15 +132,17 @@ class AuthenticatorConfig
     @saml_settings.single_logout_service_binding = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
   end
 
+  # rubocop:disable Metrics/AbcSize
   def setup_saml_security
-    @saml_settings.certificate = env_param 'CERTIFICATE', :required => false do |file|
+    @saml_settings.certificate = env_param 'CERTIFICATE', required: false do |file|
       File.read(file)
     end
-    @saml_settings.private_key = env_param 'PRIVATE_KEY', :required => !!@saml_settings.certificate, :extra_message => ' if SP_CERTIFICATE is passed' do |file|
+    @saml_settings.private_key = env_param('PRIVATE_KEY',
+                                           required: !!@saml_settings.certificate,
+                                           extra_message: ' if SP_CERTIFICATE is passed') do |file|
       File.read(file)
     end
 
-  
     @saml_settings.idp_cert_fingerprint_algorithm = XMLSecurity::Document::SHA256
 
     @saml_settings.security = {}
@@ -147,9 +156,14 @@ class AuthenticatorConfig
     @saml_settings.security[:digest_method] = XMLSecurity::Document::SHA256
     @saml_settings.security[:signature_method] = XMLSecurity::Document::RSA_SHA256
   end
+  # rubocop:enable Metrics/AbcSize
 
   def setup_saml_name_identifier_format
-    @saml_settings.name_identifier_format = env_param 'NAME_IDENTIFIER_FORMAT', :required => false, :default => 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified' do |format|
+    @saml_settings.name_identifier_format = env_param(
+      'NAME_IDENTIFIER_FORMAT',
+      required: false,
+      default: 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
+    ) do |format|
       {
         'unspecified' => 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
         'email' => 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress',
@@ -164,12 +178,12 @@ class AuthenticatorConfig
       @saml_settings.idp_slo_target_parse_binding_priority =
         ['urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST', 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect']
 
-    if idp_metadata_url = env_param('IDP_METADATA_URL', :required => false)
+    if (idp_metadata_url = env_param('IDP_METADATA_URL', required: false))
       idp_metadata_parser = OneLogin::RubySaml::IdpMetadataParser.new
 
       begin
-        @saml_settings = idp_metadata_parser.parse_remote idp_metadata_url, true, :settings => @saml_settings
-      rescue Exception => e
+        @saml_settings = idp_metadata_parser.parse_remote idp_metadata_url, true, settings: @saml_settings
+      rescue StandardError => e
         puts "Error! Failed to parse IDP metadata #{idp_metadata_url}: #{e.message}"
         exit 1
       end
@@ -179,14 +193,14 @@ class AuthenticatorConfig
   end
 
   def setup_saml_attributes
-    @saml_attributes = env_param 'ATTRIBUTES', :default => {}, :required => false do |str|
-      str.split(':').each_slice(3).map{|n, i_n, t| [n, i_n.empty? ? n : i_n, {'s' => 'single', 'm' => 'multi'}.fetch(t)] }
+    @saml_attributes = env_param 'ATTRIBUTES', default: {}, required: false do |str|
+      str.split(':').each_slice(3).map { |n, i_n, t| [n, i_n.empty? ? n : i_n, { 's' => 'single', 'm' => 'multi' }.fetch(t)] }
     end
   end
 
   def setup_saml_slo
-    @slo_disabled = env_param 'SLO_DISABLED', :required => false, :default => false do |param|
-      self.param_to_bool(param)
+    @slo_disabled = env_param 'SLO_DISABLED', required: false, default: false do |param|
+      param_to_bool(param)
     end
   end
 end

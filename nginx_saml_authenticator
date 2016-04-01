@@ -9,10 +9,10 @@ end
 
 require 'thin'
 
-thin_params = %w{-e production -R /opt/nginx_saml_authenticator/config.ru start}
+thin_params = %w(-e production -R /opt/nginx_saml_authenticator/config.ru start)
 
 if !ENV.key?('LISTEN')
-  puts "Error! Parameter LISTEN required!"
+  puts 'Error! Parameter LISTEN required!'
   exit 1
 elsif ENV['LISTEN'] =~ /^[\d\.]+:\d+$/
   thin_params << '--address'

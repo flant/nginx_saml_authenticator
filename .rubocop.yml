@@ -1,0 +1,17 @@
+AllCops:
+  TargetRubyVersion: 1.9
+
+Metrics/LineLength:
+  Max: 150
+
+Style/DoubleNegation:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Metrics/MethodLength:
+  Max: 20
+
+Metrics/ClassLength:
+  Max: 300
