@@ -1,5 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 
+export LISTEN=127.0.0.1:1500
 export PUBLIC_URL=http://exampls.com/
 export IDP_METADATA_URL=https://example-idp.com/app/VWjJo6aBvCWTFGeI8oVT5cENCrWIvoW4/sso/saml/metadata
 export SESSION_EXPIRE_AFTER=600
@@ -10,4 +11,4 @@ export CERTIFICATE=/etc/nginx/saml/sp.crt
 export PRIVATE_KEY=/etc/nginx/saml/sp.key
 export SLO_DISABLED=yes
 
-thin -e production -R config.ru -a 127.0.0.1 -p 1500 start
+./nginx_saml_authenticator

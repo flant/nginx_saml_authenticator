@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby1.9.1
+
+begin
+  require '/opt/nginx_saml_authenticator/vendor/bundle/bundler/setup'
+rescue LoadError
+  require 'bundler'
+  Bundler.setup
+end
+
+require 'thin'
+
+thin_params = %w{-e production -R /opt/nginx_saml_authenticator/config.ru start}
+
+if !ENV.key?('LISTEN')
+  puts "Error! Parameter LISTEN required!"
+  exit 1
+elsif ENV['LISTEN'] =~ /^[\d\.]+:\d+$/
+  thin_params << '--address'
+  thin_params << ENV['LISTEN'].partition(':').first
+  thin_params << '--port'
+  thin_params << ENV['LISTEN'].partition(':').last
+elsif ENV['LISTEN'] =~ /^\d+$/
+  thin_params << '--port'
+  thin_params << ENV['LISTEN']
+else
+  thin_params << '--socket'
+  thin_params << ENV['LISTEN']
+end
+
+Thin::Runner.new(thin_params).run!
