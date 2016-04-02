@@ -3,6 +3,10 @@ package_name: nginx_saml_authenticator
 package_cloud: flant/main
 package_version: 0.0.1
 
+fpm_description: SAML authenticator for Nginx
+fpm_maintainer: dmitry.stolyarov@flant.com
+fpm_url: https://github.com/flant/nginx_saml_authenticator
+
 fpm_config_files:
   /etc/nginx/saml_authenticator.include: nginx.include
 
