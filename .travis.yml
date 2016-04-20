@@ -16,10 +16,11 @@ install:
 - echo "export BUNDLE_GEMFILE=~/buildizer/Gemfile" | tee -a ~/.bashrc
 - export BUNDLE_GEMFILE=~/buildizer/Gemfile
 - gem install bundler
+- gem install overcommit
 - bundle install
 before_script: buildizer prepare
 script: buildizer build
 env:
-- BUILDIZER_TARGET=ubuntu-14.04
-- BUILDIZER_TARGET=ubuntu-12.04
+- BUILDIZER_TARGET=ubuntu/14.04
+- BUILDIZER_TARGET=ubuntu/12.04
 after_success: buildizer deploy

@@ -29,5 +29,5 @@ before_build:
 - bundle install --standalone --deployment
 
 target:
-- ubuntu-14.04
-- ubuntu-12.04
+- ubuntu/14.04
+- ubuntu/12.04
