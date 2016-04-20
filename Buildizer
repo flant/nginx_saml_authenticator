@@ -20,10 +20,9 @@ fpm_files:
   /opt/nginx_saml_authenticator/vendor: vendor
   /usr/bin/nginx_saml_authenticator: nginx_saml_authenticator
 
-os:
-  ubuntu:
-    prepare:
-    - apt-get install git ruby-bundler libxml2-dev zlib1g-dev
+ubuntu:
+  prepare:
+  - apt-get install -y git ruby-bundler libxml2-dev zlib1g-dev
 
 before_build:
 - bundle install --standalone --deployment
