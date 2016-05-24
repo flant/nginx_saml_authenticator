@@ -4,6 +4,8 @@ require 'ruby-saml'
 require 'ice_nine'
 require 'json'
 
+require 'rack/session/moneta'
+
 require_relative 'authenticator_config'
 
 class Authenticator < Sinatra::Base

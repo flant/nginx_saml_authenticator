@@ -1,7 +1,7 @@
 #!/bin/sh
 
 export LISTEN=127.0.0.1:1500
-export PUBLIC_URL=http://exampls.com/
+export PUBLIC_URL=http://example.com/
 export IDP_METADATA_URL=https://example-idp.com/app/VWjJo6aBvCWTFGeI8oVT5cENCrWIvoW4/sso/saml/metadata
 export SESSION_EXPIRE_AFTER=600
 export SESSION_MEMCACHE_SERVERS=127.0.0.1:11211
