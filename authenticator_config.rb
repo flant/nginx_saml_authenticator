@@ -41,7 +41,6 @@ class AuthenticatorConfig
 
   attr_reader  :public_url
   attr_reader  :sessions_backend
-  attr_reader  :sessions_settings
   attr_reader  :saml_settings
   attr_reader  :saml_attributes
 
@@ -55,6 +54,22 @@ class AuthenticatorConfig
 
   def deep_freeze
     IceNine.deep_freeze self
+  end
+
+  def sessions_settings
+    store = if (memcache_servers = env_param('SESSION_MEMCACHE_SERVERS', required: false))
+              namespace = env_param 'SESSION_MEMCACHE_NAMESPACE', default: 'sessions', required: false
+              Moneta.new(:Memcached, expires: true, server: memcache_servers, namespace: namespace)
+            elsif env_param('DATABASE_URL', required: false)
+              require 'mysql2'
+              require 'sinatra/activerecord'
+
+              Moneta.new(:ActiveRecord, expires: true)
+            else
+              Moneta.new(:Memory, expires: true)
+            end
+
+    @sessions_settings.merge(store: store)
   end
 
   private
@@ -78,21 +93,6 @@ class AuthenticatorConfig
     @sessions_settings[:expire_after] = env_param 'SESSION_EXPIRE_AFTER', default: 600, required: false do |v|
       Integer(v)
     end
-
-    store = if (memcache_servers = env_param('SESSION_MEMCACHE_SERVERS', required: false))
-              namespace = env_param 'SESSION_MEMCACHE_NAMESPACE', default: 'sessions', required: false
-              Moneta.new(:Memcached, expires: true, server: memcache_servers, namespace: namespace)
-            elsif env_param('DATABASE_URL', required: false)
-              require 'mysql2'
-              require 'sinatra/activerecord'
-
-              Moneta.new(:ActiveRecord, expires: true)
-            else
-              Moneta.new(:Memory, expires: true)
-            end
-    store.features # XXX: to assign @features variable to use deep_freeze
-
-    @sessions_settings[:store] = store
   end
 
   def setup_saml
