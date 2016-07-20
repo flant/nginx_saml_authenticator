@@ -37,6 +37,8 @@ class Authenticator < Sinatra::Base
   end
 
   before do
+    logger.error [:BEFORE!, session, request.ip].inspect
+
     if session.key?('remote_addr') && session['remote_addr'] != request.ip
       logger.error 'remote_addr changed'
       session.destroy
@@ -52,8 +54,6 @@ class Authenticator < Sinatra::Base
   end
 
   route :get, :post, '/saml/auth' do
-    logger.error session.inspect
-    
     if session['nameid']
       if session.key? 'attributes'
         encoded_attributes = Base64.strict_encode64(
