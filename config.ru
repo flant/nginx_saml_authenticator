@@ -1,3 +1,3 @@
-require './authenticator'
+require_relative 'authenticator'
 
 run Authenticator
