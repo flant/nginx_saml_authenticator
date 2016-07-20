@@ -34,7 +34,7 @@ class Authenticator < Sinatra::Base
   end
 
   before do
-    logger.error [:BEFORE!, session, request.ip].inspect
+    logger.error [:BEFORE!, session['nameid'], session, request.ip].inspect
 
     if session.key?('remote_addr') && session['remote_addr'] != request.ip
       logger.error 'remote_addr changed'
@@ -85,7 +85,7 @@ class Authenticator < Sinatra::Base
       halt 401
     end
 
-    # session.destroy
+    session.destroy
 
     session['nameid'] = saml_response.nameid
     session['remote_addr'] = request.ip

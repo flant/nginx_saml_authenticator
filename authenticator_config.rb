@@ -89,7 +89,7 @@ class AuthenticatorConfig
 
     @sessions_settings = {}
     @sessions_settings[:key] = env_param 'SESSION_COOKIE_NAME', default: 'saml', required: false
-    @sessions_settings[:secure] = public_url.start_with? 'https://'
+    # @sessions_settings[:secure] = public_url.start_with? 'https://'
     @sessions_settings[:expire_after] = env_param 'SESSION_EXPIRE_AFTER', default: 600, required: false do |v|
       Integer(v)
     end
