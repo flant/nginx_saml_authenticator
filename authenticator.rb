@@ -52,6 +52,8 @@ class Authenticator < Sinatra::Base
   end
 
   route :get, :post, '/saml/auth' do
+    logger.error session.inspect
+    
     if session['nameid']
       if session.key? 'attributes'
         encoded_attributes = Base64.strict_encode64(
@@ -92,6 +94,8 @@ class Authenticator < Sinatra::Base
     session['remote_addr'] = request.ip
     session['idp_session'] = saml_response.sessionindex if saml_response.sessionindex
     session['idp_session_expires_at'] = saml_response.session_expires_at if saml_response.session_expires_at
+
+    logger.error session.inspect
 
     config.saml_attributes.each do |name, internal_name, type|
       if saml_response.attributes.include? name
