@@ -85,7 +85,7 @@ class Authenticator < Sinatra::Base
       halt 401
     end
 
-    session.destroy
+    # session.destroy
 
     session['nameid'] = saml_response.nameid
     session['remote_addr'] = request.ip
