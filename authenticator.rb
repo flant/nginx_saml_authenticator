@@ -92,7 +92,7 @@ class Authenticator < Sinatra::Base
     session['idp_session'] = saml_response.sessionindex if saml_response.sessionindex
     session['idp_session_expires_at'] = saml_response.session_expires_at if saml_response.session_expires_at
 
-    logger.error [:REQUEST_SECURE?, request.ssl?, env.select{ |k, v| k =~ /session/ }].inspect
+    logger.error [:REQUEST_SECURE?, request.ssl?, request].inspect
 
     config.saml_attributes.each do |name, internal_name, type|
       if saml_response.attributes.include? name
