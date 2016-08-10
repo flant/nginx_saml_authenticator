@@ -60,12 +60,13 @@ class Authenticator < Sinatra::Base
 
       headers 'Authorization' => 'Basic ' + Base64.strict_encode64("#{session['nameid']}:#{encoded_attributes}")
     elsif config.authentication_required?
+      session['original_uri'] = env['HTTP_X_AUTH_REQUEST_ORIGINAL_URI']
       if config.saml_settings.idp_sso_target_binding == 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
         redirect config.public_url + 'saml/login', 403
       elsif config.saml_settings.idp_sso_target_binding == 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
         redirect OneLogin::RubySaml::Authrequest.new.create(
           config.saml_settings,
-          RelayState: config.public_url[0...-1] + env['HTTP_X_AUTH_REQUEST_ORIGINAL_URI']
+          'RelayState' => get_relay_state(session['original_uri'])
         ), 403
       else
         logger.error 'idp_sso_target_binding not configured'
@@ -136,18 +137,19 @@ class Authenticator < Sinatra::Base
   get '/saml/login' do
     return redirect request.referer || config.public_url if session['nameid']
 
+    original_uri = session['original_uri'] || request.referrer
     if config.saml_settings.idp_sso_target_binding == 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
       erb :form, locals: {
         action: config.saml_settings.idp_sso_target_url,
         params: OneLogin::RubySaml::Authrequest.new.create_params(
           config.saml_settings,
-          RelayState: request.referer
+          'RelayState' => get_relay_state(original_uri)
         )
       }
     elsif config.saml_settings.idp_sso_target_binding == 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
       redirect OneLogin::RubySaml::Authrequest.new.create(
         config.saml_settings,
-        RelayState: request.referer
+        'RelayState' => get_relay_state(original_uri)
       )
     else
       logger.error 'idp_sso_target_binding not configured'
@@ -177,17 +179,25 @@ class Authenticator < Sinatra::Base
         action: saml_settings.idp_slo_target_url,
         params: saml_logout_request.create_params(
           saml_settings,
-          RelayState: config.authentication_required? ? request.referer : nil
+          'RelayState' => config.authentication_required? ? request.referer : nil
         )
       }
     elsif config.saml_settings.idp_slo_target_binding == 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
       redirect saml_logout_request.create(
         saml_settings,
-        RelayState: config.authentication_required? ? request.referer : nil
+        'RelayState' => config.authentication_required? ? request.referer : nil
       )
     else
       logger.error 'idp_sso_target_binding not configured'
       halt 500
     end
+  end
+
+  protected
+
+  def get_relay_state(path)
+    path ||= ''
+    path = path[1..-1] if path[0] == '/'
+    "#{config.public_url}#{path}"
   end
 end
