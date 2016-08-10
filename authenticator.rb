@@ -60,13 +60,13 @@ class Authenticator < Sinatra::Base
 
       headers 'Authorization' => 'Basic ' + Base64.strict_encode64("#{session['nameid']}:#{encoded_attributes}")
     elsif config.authentication_required?
-      session['original_uri'] = env['HTTP_X_AUTH_REQUEST_ORIGINAL_URI']
+      original_uri = env['HTTP_X_AUTH_REQUEST_ORIGINAL_URI']
       if config.saml_settings.idp_sso_target_binding == 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
-        redirect config.public_url + 'saml/login', 403
+        redirect config.public_url + "saml/login?original_uri=#{original_uri}", 403
       elsif config.saml_settings.idp_sso_target_binding == 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
         redirect OneLogin::RubySaml::Authrequest.new.create(
           config.saml_settings,
-          'RelayState' => get_relay_state(session['original_uri'])
+          'RelayState' => get_relay_state(original_uri)
         ), 403
       else
         logger.error 'idp_sso_target_binding not configured'
@@ -136,8 +136,7 @@ class Authenticator < Sinatra::Base
 
   get '/saml/login' do
     return redirect request.referer || config.public_url if session['nameid']
-
-    original_uri = session['original_uri'] || request.referrer
+    original_uri = params[:original_uri] || request.referrer
     if config.saml_settings.idp_sso_target_binding == 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
       erb :form, locals: {
         action: config.saml_settings.idp_sso_target_url,
