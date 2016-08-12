@@ -57,16 +57,19 @@ class AuthenticatorConfig
   end
 
   def sessions_settings
+    expires = env_param 'SESSION_EXPIRE_AFTER', default: 600, required: false do |v|
+      Integer(v)
+    end
     store = if (memcache_servers = env_param('SESSION_MEMCACHE_SERVERS', required: false))
               namespace = env_param 'SESSION_MEMCACHE_NAMESPACE', default: 'sessions', required: false
-              Moneta.new(:Memcached, expires: true, server: memcache_servers, namespace: namespace)
+              Moneta.new(:Memcached, expires: expires, server: memcache_servers, namespace: namespace)
             elsif env_param('DATABASE_URL', required: false)
               require 'mysql2'
               require 'sinatra/activerecord'
 
-              Moneta.new(:ActiveRecord, expires: true)
+              Moneta.new(:ActiveRecord, expires: expires)
             else
-              Moneta.new(:Memory, expires: true)
+              Moneta.new(:Memory, expires: expires)
             end
 
     @sessions_settings.merge(store: store)
@@ -90,9 +93,6 @@ class AuthenticatorConfig
     @sessions_settings = {}
     @sessions_settings[:key] = env_param 'SESSION_COOKIE_NAME', default: 'saml', required: false
     @sessions_settings[:secure] = public_url.start_with? 'https://'
-    @sessions_settings[:expire_after] = env_param 'SESSION_EXPIRE_AFTER', default: 600, required: false do |v|
-      Integer(v)
-    end
   end
 
   def setup_saml
