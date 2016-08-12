@@ -93,6 +93,12 @@ class AuthenticatorConfig
     @sessions_settings = {}
     @sessions_settings[:key] = env_param 'SESSION_COOKIE_NAME', default: 'saml', required: false
     @sessions_settings[:secure] = public_url.start_with? 'https://'
+
+    session_domain = env_param 'SESSION_DOMAIN', required: false
+    @sessions_settings[:domain] = session_domain unless session_domain.nil?
+
+    session_secret = env_param 'SESSION_SECRET', required: false
+    @sessions_settings[:secret] = session_secret unless session_secret.nil?
   end
 
   def setup_saml
