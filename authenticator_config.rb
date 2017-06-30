@@ -68,6 +68,8 @@ class AuthenticatorConfig
               require 'sinatra/activerecord'
 
               Moneta.new(:ActiveRecord, expires: expires)
+            elsif env_param('REDIS_URL', required: false)
+              Moneta.new(:Redis, expires: expires)
             else
               Moneta.new(:Memory, expires: expires)
             end

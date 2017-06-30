@@ -13,3 +13,4 @@ gem 'puma'
 
 gem 'moneta'
 gem 'mysql2', require: false
+gem 'redis', require: false
