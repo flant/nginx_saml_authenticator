@@ -62,12 +62,12 @@ class Authenticator < Sinatra::Base
     elsif config.authentication_required?
       original_uri = env['HTTP_X_AUTH_REQUEST_ORIGINAL_URI'] || env['HTTP_X_ORIGINAL_URI']
       if config.saml_settings.idp_sso_target_binding == 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
-        redirect config.public_url + "saml/login?original_uri=#{CGI.escape(original_uri)}", 403
+        redirect config.public_url + "saml/login?original_uri=#{CGI.escape(original_uri)}", 401
       elsif config.saml_settings.idp_sso_target_binding == 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
         redirect OneLogin::RubySaml::Authrequest.new.create(
           config.saml_settings,
           'RelayState' => get_relay_state(original_uri)
-        ), 403
+        ), 401
       else
         logger.error 'idp_sso_target_binding not configured'
         halt 500
