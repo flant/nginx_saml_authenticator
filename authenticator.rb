@@ -61,6 +61,8 @@ class Authenticator < Sinatra::Base
       headers 'Authorization' => 'Basic ' + Base64.strict_encode64("#{session['nameid']}:#{encoded_attributes}")
     elsif config.authentication_required?
       original_uri = env['HTTP_X_AUTH_REQUEST_ORIGINAL_URI'] || env['HTTP_X_ORIGINAL_URI']
+      session[:original_uri] = original_uri
+
       if config.saml_settings.idp_sso_target_binding == 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
         redirect config.public_url + "saml/login?original_uri=#{CGI.escape(original_uri)}", 401
       elsif config.saml_settings.idp_sso_target_binding == 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
@@ -136,7 +138,8 @@ class Authenticator < Sinatra::Base
 
   get '/saml/login' do
     return redirect request.referer || config.public_url if session['nameid']
-    original_uri = (params[:original_uri] && CGI.unescape(params[:original_uri])) || request.referrer
+    original_uri = (params[:original_uri] && CGI.unescape(params[:original_uri])) || session[:original_uri] || request.referrer
+
     if config.saml_settings.idp_sso_target_binding == 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
       erb :form, locals: {
         action: config.saml_settings.idp_sso_target_url,
