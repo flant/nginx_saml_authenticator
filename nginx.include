@@ -4,6 +4,7 @@ auth_request_set $saml_authorization $upstream_http_authorization;
 auth_request_set $saml_set_cookie $upstream_http_set_cookie;
 
 error_page 403 = @saml_auth;
+error_page 401 = @saml_auth;
 
 proxy_set_header Authorization $saml_authorization;
 
