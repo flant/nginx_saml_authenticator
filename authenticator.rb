@@ -60,7 +60,7 @@ class Authenticator < Sinatra::Base
 
       headers 'Authorization' => 'Basic ' + Base64.strict_encode64("#{session['nameid']}:#{encoded_attributes}")
     elsif config.authentication_required?
-      original_uri = env['HTTP_X_AUTH_REQUEST_ORIGINAL_URI'] || env['HTTP_X_ORIGINAL_URI']
+      original_uri = env['HTTP_X_AUTH_REQUEST_ORIGINAL_URI'] || env['HTTP_X_ORIGINAL_URI'] || '/'
       session[:original_uri] = original_uri
 
       if config.saml_settings.idp_sso_target_binding == 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
